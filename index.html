@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#D8DED2">
+<title>今朝吃啥 · 上海一日三餐</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23B32B1C'/%3E%3Ctext x='50' y='70' font-size='62' text-anchor='middle' fill='%23F3EFE3' font-family='sans-serif'%3E吃%3C/text%3E%3C/svg%3E">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  :root{
+    --bg:#D8DED2;
+    --paper:#F3EFE3;
+    --ink:#1B1E1C;
+    --ink-70:rgba(27,30,28,.72);
+    --ink-45:rgba(27,30,28,.45);
+    --ink-25:rgba(27,30,28,.25);
+    --red:#B32B1C;
+    --red-dark:#8C2014;
+    --ochre:#8F6418;
+    --indigo:#1F4257;
+    --mono:Consolas,"SF Mono","Courier New",monospace;
+    --sans:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --display:SimHei,"Heiti SC","Microsoft YaHei","PingFang SC",sans-serif;
+  }
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    background-color:var(--bg);
+    background-image:repeating-linear-gradient(0deg,rgba(27,30,28,.02) 0 1px,transparent 1px 5px);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:600px;margin:0 auto;padding:34px 20px 52px}
+
+  /* 报头 */
+  .masthead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  h1{margin:0;font-family:var(--display);font-size:clamp(38px,10.5vw,50px);line-height:.98;font-weight:700;letter-spacing:.03em}
+  .sub{margin:12px 0 0;font-size:11.5px;letter-spacing:.32em;color:var(--ink-70)}
+  .seal{
+    flex:0 0 auto;width:52px;height:52px;display:grid;place-items:center;
+    border:2.5px solid var(--red);color:var(--red);
+    font-family:var(--display);font-size:26px;font-weight:700;
+    transform:rotate(-7deg);opacity:.92;margin-top:4px;
+    box-shadow:inset 0 0 0 1.5px rgba(179,43,28,.38);
+  }
+  .rule{height:3px;background:var(--ink);margin:20px 0 10px}
+  .dateline{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:11px;letter-spacing:.16em;color:var(--ink-70);margin-bottom:26px}
+
+  /* 筛选 */
+  .filter-label{margin:0 0 10px;font-size:11.5px;letter-spacing:.2em;color:var(--ink-70)}
+  .moods{display:flex;flex-wrap:wrap;gap:7px;padding:0 0 20px}
+  .mood{
+    flex:0 0 auto;font-family:var(--sans);font-size:12.5px;letter-spacing:.06em;
+    padding:7px 12px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    cursor:pointer;border-radius:0;transition:background .15s,color .15s;
+  }
+  .mood:hover{background:rgba(27,30,28,.08)}
+  .mood.active{background:var(--ink);color:var(--paper)}
+
+  /* 饭票 */
+  .ticket{
+    --c:#8F6418;
+    position:relative;display:grid;grid-template-columns:54px 1fr;
+    background:var(--paper);border:1.5px solid var(--ink);margin:0 0 26px;
+  }
+  .stub{
+    background:var(--c);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .stub span{
+    writing-mode:vertical-rl;font-family:var(--display);font-weight:700;
+    font-size:15px;letter-spacing:.38em;
+  }
+  .tbody{padding:13px 16px 14px 18px;min-width:0;border-left:1.5px dashed rgba(27,30,28,.5)}
+  .thead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
+  .serial{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-45)}
+  .time{font-size:10px;letter-spacing:.14em;color:var(--ink-45);font-variant-numeric:tabular-nums}
+  .dish-name{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(25px,6vw,33px);line-height:1.16;
+    margin:0 0 8px;color:var(--ink);overflow-wrap:anywhere;
+  }
+  .dish-desc{margin:0 0 14px;font-size:12.5px;line-height:1.75;color:var(--ink-70);letter-spacing:.03em}
+  .tfoot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:11px;border-top:1px solid var(--ink-25)}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-right:auto}
+  .tag{font-size:10px;letter-spacing:.12em;padding:2px 6px;border:1px solid var(--ink-25);color:var(--ink-70)}
+  .acts{display:flex;gap:7px}
+  .btn{
+    font-family:var(--sans);font-size:11.5px;letter-spacing:.08em;
+    padding:7px 12px;border:1px solid var(--ink);background:transparent;color:var(--ink);
+    cursor:pointer;border-radius:0;transition:background .15s,color .15s,border-color .15s;
+  }
+  .btn:hover{background:var(--ink);color:var(--paper)}
+  .btn:active{transform:translateY(1px)}
+  .btn.locked{background:var(--red);border-color:var(--red);color:var(--paper)}
+  .btn.locked:hover{background:var(--red-dark);border-color:var(--red-dark)}
+
+  .ticket.rolling .dish-name{opacity:.4}
+  .ticket.rolling .dish-desc{opacity:.22}
+  .ticket.rolling .tags{opacity:.22}
+  .ticket.rolling .dish-name,.ticket.rolling .dish-desc,.ticket.rolling .tags{transition:opacity .08s}
+  .dish-name.land{animation:land .34s cubic-bezier(.2,.85,.3,1)}
+  @keyframes land{
+    0%{opacity:.15;transform:translateY(5px)}
+    60%{opacity:1;transform:translateY(0)}
+    78%{transform:scale(1.018)}
+    100%{transform:scale(1)}
+  }
+
+  /* 主按钮 */
+  .master{
+    width:100%;margin-top:2px;padding:17px 12px;
+    background:var(--red);color:var(--paper);border:1.5px solid var(--ink);
+    font-family:var(--display);font-size:16px;font-weight:700;
+    letter-spacing:.45em;text-indent:.45em;cursor:pointer;
+    box-shadow:5px 5px 0 rgba(27,30,28,.22);
+    transition:background .15s,transform .1s,box-shadow .1s;
+  }
+  .master:hover{background:var(--red-dark)}
+  .master:active{transform:translate(4px,4px);box-shadow:1px 1px 0 rgba(27,30,28,.22)}
+  .hint{margin:12px 0 0;font-size:11px;letter-spacing:.06em;color:var(--ink-45);text-align:center;line-height:1.7}
+  .copy{
+    display:block;width:100%;margin:14px 0 0;padding:10px;
+    background:transparent;border:1px dashed var(--ink-45);color:var(--ink-70);
+    font-family:var(--sans);font-size:12px;letter-spacing:.14em;cursor:pointer;
+    transition:border-color .15s,color .15s,background .15s;border-radius:0;
+  }
+  .copy:hover{border-style:solid;border-color:var(--ink);color:var(--ink);background:rgba(27,30,28,.04)}
+
+  /* 最近吃过 */
+  .history{margin-top:42px}
+  .hhead{display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:12px}
+  .hhead h2{margin:0;font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:.24em}
+  .clear{background:none;border:none;padding:0;font-family:var(--sans);font-size:11px;letter-spacing:.1em;color:var(--ink-45);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .clear:hover{color:var(--red)}
+  .hlist{display:flex;flex-direction:column;gap:7px}
+  .hrow{display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:var(--ink-70)}
+  .sq{width:7px;height:7px;flex:0 0 auto;display:inline-block;transform:translateY(-1px)}
+  .hname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62%}
+  .dots{flex:1;border-bottom:1px dotted var(--ink-45);transform:translateY(-3px);min-width:12px}
+  .hdate{flex:0 0 auto;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-45)}
+  .empty{margin:0;font-size:12px;letter-spacing:.05em;color:var(--ink-45)}
+
+  footer{
+    margin-top:40px;padding-top:14px;border-top:1px solid var(--ink-25);
+    display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    font-size:10.5px;letter-spacing:.1em;color:var(--ink-45);
+  }
+
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translate(-50%,14px);
+    background:var(--ink);color:var(--paper);font-size:12.5px;letter-spacing:.08em;
+    padding:9px 16px;opacity:0;pointer-events:none;z-index:99;max-width:82vw;text-align:center;
+    transition:opacity .22s,transform .22s;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  :focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+  }
+  @media (max-width:400px){
+    .ticket{grid-template-columns:46px 1fr}
+    .tbody{padding:12px 13px 13px 14px}
+    .sub{letter-spacing:.22em}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>今朝吃啥</h1>
+      <p class="sub">上海宁的一日三餐</p>
+    </div>
+    <div class="seal" aria-hidden="true">沪</div>
+  </header>
+
+  <div class="rule"></div>
+  <div class="dateline">
+    <span id="dateText"></span>
+    <span id="weekText"></span>
+  </div>
+
+  <p class="filter-label">今天想吃点什么</p>
+  <nav class="moods" id="moods" aria-label="口味筛选"></nav>
+
+  <section class="meals" id="meals"></section>
+
+  <button class="master" id="masterRoll">重 摇 一 次</button>
+  <p class="hint">「换一张」单独换 · 「锁定」的那张不会被重摇</p>
+  <button class="copy" id="copyBtn">复制今日菜单</button>
+
+  <section class="history">
+    <div class="hhead">
+      <h2>最近吃过</h2>
+      <button class="clear" id="clearHistory">清空</button>
+    </div>
+    <div class="hlist" id="historyList"></div>
+  </section>
+
+  <footer>
+    <span id="quoteText"></span>
+    <span>上海 · 今朝吃啥</span>
+  </footer>
+
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============ 数据 ============ */
+  const DATA = {
+    breakfast: [
+      { n: '大饼油条豆浆粢饭', d: '四大金刚凑一桌，老上海早饭的魂', t: ['点心'] },
+      { n: '南翔小笼 + 咖喱牛肉汤', d: '皮薄汁多，先开窗、后喝汤', t: ['点心', '汤'] },
+      { n: '生煎包 + 牛肉粉丝汤', d: '底脆肉香，咬开当心烫嘴巴', t: ['点心', '汤'] },
+      { n: '锅贴 + 咸豆浆', d: '一客锅贴一碗咸浆，灵光', t: ['点心', '汤'] },
+      { n: '葱油拌面', d: '葱油熬到焦香，拌开就是上海味', t: ['面', '快'] },
+      { n: '阳春面 + 荷包蛋', d: '清汤光面，越简单越见功夫', t: ['面', '清淡', '快'] },
+      { n: '粢饭糕 + 咸豆浆', d: '外脆里糯，配根油条更嗲', t: ['点心', '快'] },
+      { n: '老虎脚爪 + 豆浆', d: '老底子的甜大饼，如今不大好寻', t: ['点心', '清淡'] },
+      { n: '糯米烧麦 + 蛋皮汤', d: '油润咸鲜，一笼就管饱', t: ['点心', '汤'] },
+      { n: '蟹壳黄 + 豆浆', d: '酥皮掉渣，芝麻一咬满口香', t: ['点心'] },
+      { n: '包脚布', d: '上海版煎饼，加蛋加脆饼', t: ['点心', '快'] },
+      { n: '米饭饼 + 油条', d: '带点酒酿甜香，夹油条刚刚好', t: ['点心'] },
+      { n: '羌饼', d: '葱香千层，一口下去掉渣', t: ['点心'] },
+      { n: '油墩子', d: '萝卜丝馅，油锅里捞出来的香', t: ['点心'] },
+      { n: '泡饭 + 腐乳酱瓜', d: '屋里厢的早饭，简单清爽', t: ['清淡', '快'] },
+      { n: '白粥 + 咸鸭蛋 + 肉松', d: '肠胃不舒服的时候，吃这个最妥帖', t: ['清淡'] },
+      { n: '菜肉大馄饨', d: '荠菜鲜肉，汤里飘着蛋皮丝', t: ['点心', '汤', '清淡'] },
+      { n: '柴爿小馄饨', d: '皮子薄得透光，一碗下去暖烘烘', t: ['点心', '汤', '清淡'] },
+      { n: '单档 / 双档', d: '油豆腐线粉汤，配只百叶包', t: ['汤', '清淡'] },
+      { n: '豆腐花 + 大饼', d: '咸豆花配脆大饼，甜党勿要吵', t: ['清淡', '点心'] },
+      { n: '鲜肉包 + 豆浆', d: '包子要趁热，汁水才足', t: ['点心', '快'] },
+      { n: '牛肉煎包', d: '底焦脆，牛肉馅扎实', t: ['点心'] },
+      { n: '鲜肉月饼', d: '光明邨排队也值，趁热吃', t: ['点心', '犒劳'] },
+      { n: '鸡蛋饼 + 豆奶', d: '路边摊的日常，五分钟搞定', t: ['快', '点心'] },
+      { n: '麦当劳早餐', d: '赶时间就它，薯饼一定要加', t: ['快'] },
+      { n: '便利店饭团 + 关东煮', d: '地铁口解决，边走边吃', t: ['快', '清淡'] },
+      { n: '咖啡 + 可颂', d: '咖啡续命，面包垫肚', t: ['快', '犒劳'] },
+      { n: '糖糕', d: '炸得金黄，甜糯拉丝', t: ['点心'] }
+    ],
+    lunch: [
+      { n: '葱油拌面', d: '一碗面，一勺葱油，忙起来最省事', t: ['面', '快'] },
+      { n: '辣肉面', d: '上海的辣肉面，辣得温柔', t: ['面', '辣'] },
+      { n: '焖肉面', d: '焖肉入口即化，汤头浓得挂嘴', t: ['面'] },
+      { n: '爆鱼面', d: '熏鱼甜咸，配面正好', t: ['面'] },
+      { n: '雪菜肉丝面', d: '雪菜鲜、肉丝嫩，清清爽爽', t: ['面', '清淡'] },
+      { n: '大肠面', d: '洗得干净，越嚼越香', t: ['面'] },
+      { n: '黄鱼面', d: '雪菜配黄鱼，鲜掉眉毛', t: ['面', '犒劳'] },
+      { n: '鳝丝面', d: '响油一浇，香气直往鼻子里钻', t: ['面', '犒劳'] },
+      { n: '辣酱面', d: '八宝辣酱浇上去，下饭又下面', t: ['面', '辣'] },
+      { n: '素鸡面', d: '素鸡吸饱汤汁，比肉还香', t: ['面', '清淡'] },
+      { n: '双菇面', d: '香菇配蘑菇，鲜得来', t: ['面', '清淡'] },
+      { n: '生煎 + 咖喱牛肉汤', d: '四个生煎一碗汤，下午有劲', t: ['点心', '汤'] },
+      { n: '小笼 + 小馄饨', d: '一笼一汤，上海人的组合拳', t: ['点心', '汤'] },
+      { n: '菜肉大馄饨', d: '荠菜鲜肉，皮子滑溜', t: ['点心', '汤', '清淡'] },
+      { n: '排骨年糕', d: '年糕蘸甜面酱，老上海标配', t: ['点心', '犒劳'] },
+      { n: '炸猪排 + 罗宋汤', d: '海派西餐，辣酱油是灵魂', t: ['汤', '犒劳'] },
+      { n: '罗宋汤 + 面包', d: '红肠卷心菜，酸酸甜甜', t: ['汤', '清淡'] },
+      { n: '老式客饭', d: '大排加青菜，白饭管够', t: ['饭', '快'] },
+      { n: '咸肉菜饭 + 骨头汤', d: '菜饭粒粒油亮，汤要趁热喝', t: ['饭', '汤', '家常'] },
+      { n: '红烧肉盖饭', d: '浓油赤酱，一勺卤汁拌饭', t: ['饭', '犒劳'] },
+      { n: '黄焖鸡米饭', d: '汤多饭香，永远不出错', t: ['饭', '快'] },
+      { n: '兰州牛肉面', d: '一清二白三红四绿，快', t: ['面', '快'] },
+      { n: '沙县拌面 + 炖罐', d: '花生酱拌面，再配个炖罐', t: ['面', '快'] },
+      { n: '麻辣烫', d: '自选一盆，想吃什么夹什么', t: ['辣', '快'] },
+      { n: '麻辣香锅', d: '干香带劲，吃完一身味儿', t: ['辣', '犒劳'] },
+      { n: '螺蛳粉', d: '闻着上头，吃着更上头', t: ['面', '辣'] },
+      { n: '猪脚饭', d: '炖得酥烂，浇汁拌饭绝了', t: ['饭', '犒劳'] },
+      { n: '煲仔饭', d: '腊味饭焦香，锅巴是精华', t: ['饭'] },
+      { n: '卤肉饭', d: '肥瘦相间，再配一颗卤蛋', t: ['饭', '快'] },
+      { n: '重庆小面', d: '麻辣鲜香，吃完冒汗', t: ['面', '辣'] },
+      { n: '日式咖喱饭', d: '温和的咖喱，配个可乐饼', t: ['饭'] },
+      { n: '寿司定食', d: '清爽不腻，下午不困', t: ['饭', '清淡', '犒劳'] },
+      { n: '便利店便当', d: '十分钟解决，还能趴一会', t: ['饭', '快'] },
+      { n: '麦当劳 / 肯德基', d: '不知道吃啥就它，稳', t: ['快', '犒劳'] },
+      { n: '披萨', d: '一个人也能点小份', t: ['犒劳'] },
+      { n: '轻食沙拉', d: '吃草一天，心里踏实', t: ['清淡', '犒劳'] },
+      { n: '牛肉粉丝汤 + 葱油饼', d: '汤暖饼脆，简单舒服', t: ['汤', '点心'] }
+    ],
+    dinner: [
+      { n: '红烧肉 + 青菜 + 米饭', d: '浓油赤酱，肥而不腻，最下饭', t: ['饭', '家常', '犒劳'] },
+      { n: '糖醋小排', d: '酸甜挂汁，冷吃也香', t: ['犒劳', '饭'] },
+      { n: '油爆虾', d: '壳脆肉嫩，连壳一起嚼', t: ['犒劳'] },
+      { n: '白斩鸡', d: '皮黄肉白，蘸酱油最灵', t: ['犒劳', '清淡'] },
+      { n: '熏鱼', d: '本帮熏鱼，甜咸入味', t: ['犒劳'] },
+      { n: '酱鸭', d: '酱香浓郁，配饭配酒都好', t: ['犒劳'] },
+      { n: '干煎带鱼', d: '煎到两面金黄，外酥里嫩', t: ['家常', '清淡'] },
+      { n: '腌笃鲜', d: '咸肉鲜肉春笋，一锅都是鲜', t: ['汤', '清淡', '家常'] },
+      { n: '草头圈子', d: '本帮名菜，肥糯清口', t: ['犒劳'] },
+      { n: '八宝辣酱', d: '甜辣酱香，拌饭一绝', t: ['辣', '饭', '家常'] },
+      { n: '响油鳝糊', d: '热油一浇滋滋响，香', t: ['犒劳'] },
+      { n: '清炒河虾仁', d: '虾仁弹牙，清淡见功夫', t: ['清淡', '犒劳'] },
+      { n: '油面筋塞肉 + 青菜汤', d: '屋里厢的味道，暖胃', t: ['家常', '清淡', '汤'] },
+      { n: '百叶结烧肉', d: '百叶结吸饱肉汁，比肉还好吃', t: ['家常', '饭'] },
+      { n: '毛蟹年糕', d: '年糕裹满蟹味，秋天限定', t: ['犒劳'] },
+      { n: '清蒸大闸蟹', d: '蘸姜醋，慢慢拆，值得', t: ['犒劳', '清淡'] },
+      { n: '咸肉菜饭 + 猪脚汤', d: '一碗菜饭一碗汤，熨帖', t: ['饭', '汤', '家常'] },
+      { n: '罗宋汤 + 炸猪排', d: '海派西餐，辣酱油不能少', t: ['汤', '犒劳'] },
+      { n: '三鲜大馄饨', d: '皮薄馅大，汤头清鲜', t: ['点心', '汤', '清淡'] },
+      { n: '羊肉面', d: '天冷了，一碗下肚从头暖到脚', t: ['面', '汤'] },
+      { n: '上海炒面', d: '浓油赤酱，粗面有嚼劲', t: ['面', '快'] },
+      { n: '上海炒饭', d: '隔夜饭炒出来才香', t: ['饭', '快'] },
+      { n: '一人食小火锅', d: '自己涮自己吃，不用迁就谁', t: ['汤', '犒劳'] },
+      { n: '牛肉火锅', d: '涮到刚好，蘸沙茶酱', t: ['汤', '犒劳'] },
+      { n: '海底捞', d: '服务到位，番茄锅必点', t: ['辣', '犒劳'] },
+      { n: '烧烤', d: '路边摊，啤酒配串', t: ['辣', '犒劳'] },
+      { n: '小龙虾', d: '十三香配冰啤，夏天标配', t: ['辣', '犒劳'] },
+      { n: '湘菜', d: '剁椒鱼头，米饭要加', t: ['辣', '饭'] },
+      { n: '川菜', d: '水煮鱼配冰粉，过瘾', t: ['辣', '饭'] },
+      { n: '港式茶餐厅', d: '菠萝油加冻柠茶，舒服', t: ['饭', '犒劳'] },
+      { n: '日料', d: '刺身寿司，清清淡淡', t: ['清淡', '犒劳'] },
+      { n: '韩料', d: '烤肉配大酱汤，热闹', t: ['辣', '犒劳'] },
+      { n: '西餐', d: '牛排配红酒，慢慢吃', t: ['犒劳'] },
+      { n: '披萨', d: '边看剧边吃，很放松', t: ['犒劳'] },
+      { n: '新疆大盘鸡', d: '皮带面拌汤汁，管饱', t: ['辣', '饭'] },
+      { n: '东北菜', d: '锅包肉加地三鲜，实在', t: ['饭', '犒劳'] },
+      { n: '云南菜', d: '酸辣开胃，菌子正当时', t: ['辣', '犒劳'] },
+      { n: '泰国菜', d: '冬阴功配菠萝饭，酸辣', t: ['辣', '犒劳'] },
+      { n: '轻食沙拉', d: '晚上吃轻点，睡得踏实', t: ['清淡'] },
+      { n: '白粥 + 小菜', d: '胃累了一天，让它歇歇', t: ['清淡', '快'] },
+      { n: '家里下碗面', d: '冰箱有什么下什么', t: ['面', '快', '家常'] },
+      { n: '卤味 + 啤酒', d: '切点卤菜，开罐啤酒', t: ['犒劳'] }
+    ]
+  };
+
+  const MEALS = [
+    { key: 'breakfast', label: '早饭', time: '06:30 — 09:30', color: '#8F6418' },
+    { key: 'lunch',     label: '中饭', time: '11:30 — 13:30', color: '#B32B1C' },
+    { key: 'dinner',    label: '夜饭', time: '17:30 — 20:00', color: '#1F4257' }
+  ];
+
+  const MOODS = [
+    { id: 'all',    label: '都行',     tags: null },
+    { id: 'noodle', label: '想吃面',   tags: ['面'] },
+    { id: 'rice',   label: '来碗饭',   tags: ['饭'] },
+    { id: 'dimsum', label: '吃点心',   tags: ['点心'] },
+    { id: 'light',  label: '清淡点',   tags: ['清淡'] },
+    { id: 'spicy',  label: '来点辣',   tags: ['辣'] },
+    { id: 'treat',  label: '犒劳自己', tags: ['犒劳'] }
+  ];
+
+  const TAG_LABEL = { '面': '面', '饭': '饭', '点心': '点心', '辣': '辣', '清淡': '清淡', '犒劳': '犒劳', '快': '快手', '汤': '带汤', '家常': '家常' };
+
+  const QUOTES = [
+    '今朝天气适意，吃饭要趁热。',
+    '一日三餐，认真吃就是正经事。',
+    '勿要问吃啥，问就是生煎。',
+    '饭要一口一口吃，日子要一天一天过。',
+    '早饭要吃好，夜饭要落胃。'
+  ];
+
+  /* ============ 工具 ============ */
+  const $ = function (s, root) { return (root || document).querySelector(s); };
+  const rnd = function (arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const CN = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  function cnNum(n) {
+    if (n <= 10) return ['', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'][n];
+    if (n < 20) return '十' + CN[n - 10];
+    var t = Math.floor(n / 10), o = n % 10;
+    return CN[t] + '十' + (o ? CN[o] : '');
+  }
+  function cnDate() {
+    var d = new Date();
+    return String(d.getFullYear()).split('').map(function (x) { return CN[+x]; }).join('')
+      + '年' + cnNum(d.getMonth() + 1) + '月' + cnNum(d.getDate()) + '日';
+  }
+  function weekday() {
+    return ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][new Date().getDay()];
+  }
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function daySeed() {
+    var d = new Date();
+    var start = new Date(d.getFullYear(), 0, 0);
+    return Math.floor((d - start) / 86400000);
+  }
+  function serial(key) {
+    var d = new Date();
+    var i = MEALS.findIndex(function (m) { return m.key === key; }) + 1;
+    return 'NO.' + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '-' + String(i).padStart(2, '0');
+  }
+
+  /* ============ 状态 ============ */
+  var KEY = 'shanghai-eat-what-v1';
+  var state = { date: todayKey(), mood: 'all', picks: {}, locks: {}, history: [] };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (!s || typeof s !== 'object') return;
+      state.mood = s.mood || 'all';
+      state.picks = s.picks || {};
+      state.locks = s.locks || {};
+      state.history = Array.isArray(s.history) ? s.history : [];
+      state.date = s.date || '';
+    } catch (e) {}
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  /* ============ 抽签 ============ */
+  function pool(key, moodId) {
+    var all = DATA[key];
+    var mood = MOODS.filter(function (m) { return m.id === moodId; })[0];
+    if (!mood || !mood.tags) return all;
+    var hit = all.filter(function (d) {
+      return d.t.some(function (t) { return mood.tags.indexOf(t) > -1; });
+    });
+    return hit.length >= 2 ? hit : all;
+  }
+
+  function choose(key, moodId, exclude) {
+    var p = pool(key, moodId);
+    var recent = state.history
+      .filter(function (h) { return h.meal === key; })
+      .slice(0, 6)
+      .map(function (h) { return h.n; });
+    var cand = p.filter(function (d) { return recent.indexOf(d.n) === -1; });
+    if (cand.length < 2) cand = p;
+    if (exclude) {
+      var f = cand.filter(function (d) { return d.n !== exclude; });
+      if (f.length) cand = f;
+    }
+    return rnd(cand);
+  }
+
+  function getDish(key) {
+    return DATA[key].filter(function (d) { return d.n === state.picks[key]; })[0] || DATA[key][0];
+  }
+
+  /* ============ 渲染 ============ */
+  function buildTickets() {
+    $('#meals').innerHTML = MEALS.map(function (m) {
+      return '' +
+        '<article class="ticket" data-meal="' + m.key + '" style="--c:' + m.color + '">' +
+          '<div class="stub" aria-hidden="true"><span>' + m.label + '</span></div>' +
+          '<div class="tbody">' +
+            '<div class="thead">' +
+              '<span class="serial">' + serial(m.key) + '</span>' +
+              '<span class="time">' + m.time + '</span>' +
+            '</div>' +
+            '<h2 class="dish-name"></h2>' +
+            '<p class="dish-desc"></p>' +
+            '<div class="tfoot">' +
+              '<div class="tags"></div>' +
+              '<div class="acts">' +
+                '<button class="btn roll-btn" data-act="roll" aria-label="换一个' + m.label + '">换一张</button>' +
+                '<button class="btn lock-btn" data-act="lock" aria-label="锁定' + m.label + '">锁定</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</article>';
+    }).join('');
+  }
+
+  function renderMoods() {
+    $('#moods').innerHTML = MOODS.map(function (m) {
+      return '<button class="mood' + (m.id === state.mood ? ' active' : '') + '" data-mood="' + m.id + '">' + m.label + '</button>';
+    }).join('');
+  }
+
+  function paintTicket(key, dish) {
+    var t = $('[data-meal="' + key + '"]');
+    $('.dish-name', t).textContent = dish.n;
+    $('.dish-desc', t).textContent = dish.d;
+    $('.tags', t).innerHTML = dish.t.map(function (tag) {
+      return '<span class="tag">' + (TAG_LABEL[tag] || tag) + '</span>';
+    }).join('');
+  }
+
+  function updateLockUI(key) {
+    var t = $('[data-meal="' + key + '"]');
+    var btn = $('.lock-btn', t);
+    var on = !!state.locks[key];
+    btn.classList.toggle('locked', on);
+    btn.textContent = on ? '已锁定' : '锁定';
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function renderHistory() {
+    var list = $('#historyList');
+    var seen = {};
+    var rows = [];
+    state.history.forEach(function (h) {
+      if (seen[h.n]) return;
+      seen[h.n] = true;
+      rows.push(h);
+    });
+    rows = rows.slice(0, 6);
+    if (!rows.length) {
+      list.innerHTML = '<p class="empty">还空着 —— 摇一张，今天就从这里开始。</p>';
+      return;
+    }
+    list.innerHTML = rows.map(function (h) {
+      var meal = MEALS.filter(function (m) { return m.key === h.meal; })[0];
+      var color = meal ? meal.color : '#1B1E1C';
+      var date = h.date ? h.date.slice(5).replace('-', '.') : '';
+      return '<div class="hrow">' +
+        '<i class="sq" style="background:' + color + '"></i>' +
+        '<span class="hname">' + h.n + '</span>' +
+        '<span class="dots"></span>' +
+        '<span class="hdate">' + date + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderAll() {
+    $('#dateText').textContent = cnDate();
+    $('#weekText').textContent = weekday();
+    $('#quoteText').textContent = '—— ' + QUOTES[daySeed() % QUOTES.length];
+    renderMoods();
+    MEALS.forEach(function (m) {
+      paintTicket(m.key, getDish(m.key));
+      updateLockUI(m.key);
+    });
+    renderHistory();
+  }
+
+  /* ============ 交互 ============ */
+  var busy = {};
+
+  function finish(key, dish, animate) {
+    state.picks[key] = dish.n;
+    paintTicket(key, dish);
+    if (animate) {
+      var nameEl = $('[data-meal="' + key + '"] .dish-name');
+      nameEl.classList.remove('land');
+      void nameEl.offsetWidth;
+      nameEl.classList.add('land');
+    }
+    state.history.unshift({ n: dish.n, meal: key, date: state.date });
+    state.history = state.history.slice(0, 80);
+    save();
+    renderHistory();
+  }
+
+  function rollMeal(key, animate) {
+    if (busy[key]) return;
+    var t = $('[data-meal="' + key + '"]');
+    var nameEl = $('.dish-name', t);
+    var current = state.picks[key];
+
+    if (!animate || reduceMotion) {
+      finish(key, choose(key, state.mood, current), false);
+      return;
+    }
+
+    busy[key] = true;
+    t.classList.add('rolling');
+    var names = pool(key, state.mood).map(function (d) { return d.n; });
+    var i = 0;
+    var total = 9;
+
+    (function tick() {
+      if (i < total) {
+        nameEl.textContent = rnd(names);
+        i++;
+        setTimeout(tick, 42 + i * 8);
+      } else {
+        busy[key] = false;
+        t.classList.remove('rolling');
+        finish(key, choose(key, state.mood, current), true);
+      }
+    })();
+  }
+
+  function rollAll() {
+    var keys = MEALS.filter(function (m) { return !state.locks[m.key]; }).map(function (m) { return m.key; });
+    if (!keys.length) { toast('三张都锁牢了，先解锁一张吧'); return; }
+    keys.forEach(function (k, i) {
+      setTimeout(function () { rollMeal(k, true); }, i * 120);
+    });
+  }
+
+  function setMood(id) {
+    if (state.mood === id) return;
+    state.mood = id;
+    save();
+    renderMoods();
+    var delay = 0;
+    MEALS.forEach(function (m) {
+      if (state.locks[m.key]) return;
+      setTimeout(function () { rollMeal(m.key, true); }, delay);
+      delay += 110;
+    });
+  }
+
+  function toggleLock(key) {
+    state.locks[key] = !state.locks[key];
+    save();
+    updateLockUI(key);
+    toast(state.locks[key] ? '锁牢了，不会被重摇换掉' : '解锁了');
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var el = $('#toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 1700);
+  }
+
+  function copyMenu() {
+    var lines = ['今天吃什么 —— ' + cnDate() + ' ' + weekday(), ''];
+    MEALS.forEach(function (m) {
+      lines.push(m.label + '：' + getDish(m.key).n);
+    });
+    lines.push('', '—— 来自「今朝吃啥」');
+    var text = lines.join('\n');
+
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        toast('菜单已复制');
+      } catch (e) {
+        toast('复制失败，手动选一下吧');
+      }
+      document.body.removeChild(ta);
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { toast('菜单已复制'); }).catch(fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  function clearHistory() {
+    if (!state.history.length) { toast('本来就空着'); return; }
+    state.history = [];
+    save();
+    renderHistory();
+    toast('记录清空了');
+  }
+
+  function bind() {
+    $('#meals').addEventListener('click', function (e) {
+      var btn = e.target.closest('.btn');
+      if (!btn) return;
+      var key = btn.closest('.ticket').getAttribute('data-meal');
+      if (btn.getAttribute('data-act') === 'lock') toggleLock(key);
+      else rollMeal(key, true);
+    });
+    $('#moods').addEventListener('click', function (e) {
+      var b = e.target.closest('.mood');
+      if (b) setMood(b.getAttribute('data-mood'));
+    });
+    $('#masterRoll').addEventListener('click', rollAll);
+    $('#copyBtn').addEventListener('click', copyMenu);
+    $('#clearHistory').addEventListener('click', clearHistory);
+  }
+
+  /* ============ 启动 ============ */
+  function init() {
+    load();
+    if (state.date !== todayKey()) {
+      state.date = todayKey();
+      state.picks = {};
+      state.locks = {};
+    }
+    buildTickets();
+    MEALS.forEach(function (m) {
+      var cur = DATA[m.key].filter(function (d) { return d.n === state.picks[m.key]; })[0];
+      if (!cur) state.picks[m.key] = choose(m.key, state.mood, null).n;
+    });
+    renderAll();
+    bind();
+    save();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
